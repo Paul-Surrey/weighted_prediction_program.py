@@ -105,7 +105,7 @@ if st.button("Set Main Numbers"):
 
 # Automatically handle new entry with Go button and clear input
 new_entry = st.text_input("Enter a New Number (0-36, 37 for '00'):", key="new_number_input")
-if new_entry:
+if new_entry.strip():  # Ensure the input is not empty or just whitespace
     try:
         number = int(new_entry)
         if 0 <= number <= 37:
