@@ -77,8 +77,9 @@ def display_predictions(entries, main_numbers, matches):
 
         # Display results
         st.write("### Prediction Results:")
-        results = "\n".join(f"{format_entry_display(num)} has {prob}%" for num, prob in probabilities.items())
-        st.text(results)
+        results = " | ".join(f"{format_entry_display(num)}: {prob}%" for num, prob in probabilities.items())
+        st.write(results)
+
 
 # Streamlit UI
 st.title("Weighted Prediction Program")
