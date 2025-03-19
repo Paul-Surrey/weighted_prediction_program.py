@@ -57,12 +57,6 @@ def backtrack_entry():
         st.session_state["matches"] = matches
         st.success(f"Removed last entry: {last_entry}")
 
-def display_matrix(entries):
-    if entries:
-        matrix = [[format_entry_display(entry) for entry in entries[i:i + 6]] for i in range(0, len(entries), 6)]
-        st.write("### Matrix of Entries:")
-        st.dataframe(matrix, use_container_width=True)
-
 def display_predictions(entries, main_numbers, matches):
     if entries and main_numbers:
         total_weight = len(entries)  # Total entries processed as the base weight
@@ -75,11 +69,17 @@ def display_predictions(entries, main_numbers, matches):
 
         probabilities = {num: round((weighted_matches[num] / total_weight) * 100, 2) for num in main_numbers}
 
-        # Display results
-        st.write("### Prediction Results:")
+        # Display results with smaller font
+        st.markdown("<h4>Prediction Results:</h4>", unsafe_allow_html=True)
         results = " | ".join(f"{format_entry_display(num)}: {prob}%" for num, prob in probabilities.items())
         st.write(results)
 
+def display_matrix(entries):
+    if entries:
+        # Display matrix with smaller font for title
+        st.markdown("<h4>Matrix of Entries:</h4>", unsafe_allow_html=True)
+        matrix = [[format_entry_display(entry) for entry in entries[i:i + 6]] for i in range(0, len(entries), 6)]
+        st.dataframe(matrix, use_container_width=True)
 
 # Streamlit UI
 st.title("Weighted Prediction Program")
@@ -101,18 +101,19 @@ if st.button("Set Main Numbers"):
     else:
         set_main_numbers(validation_result)
 
-# User input for new entries
-new_entry = st.number_input("Enter a New Number (0-36, 37 for '00'):", min_value=0, max_value=37, step=1)
-if st.button("Add Entry"):
+# Automatically handle new entry with Go button and clear input
+new_entry = st.number_input("Enter a New Number (0-36, 37 for '00'):", min_value=0, max_value=37, step=1, key="new_number_input")
+if new_entry != 0 or new_entry == 37:  # Ensure Go is hit for non-default values
     add_entry(int(new_entry))
-    display_matrix(st.session_state["entries"])  # Show matrix
-    display_predictions(st.session_state["entries"], st.session_state["main_numbers"], st.session_state["matches"])  # Show predictions
+    display_predictions(st.session_state["entries"], st.session_state["main_numbers"], st.session_state["matches"])
+    display_matrix(st.session_state["entries"])
+    st.session_state["new_number_input"] = 0  # Clear input field for new entry
 
-# Buttons for actions
-if st.button("Reset Program"):
-    reset_program()
-
+# Buttons for actions (reordered)
 if st.button("Backtrack Last Entry"):
     backtrack_entry()
-    display_matrix(st.session_state["entries"])  # Update matrix
-    display_predictions(st.session_state["entries"], st.session_state["main_numbers"], st.session_state["matches"])  # Update predictions
+    display_predictions(st.session_state["entries"], st.session_state["main_numbers"], st.session_state["matches"])
+    display_matrix(st.session_state["entries"])
+
+if st.button("Reset Program"):
+    reset_program()
