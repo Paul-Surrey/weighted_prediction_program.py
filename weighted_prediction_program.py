@@ -85,13 +85,17 @@ def display_predictions(entries, main_numbers, matches):
 def display_matrix(entries):
     if entries:
         st.markdown("<h4>Matrix of Entries:</h4>", unsafe_allow_html=True)
-        # Group entries into rows of six
-        matrix = [entries[i:i + 6] for i in range(0, len(entries), 6)]
-        for row in matrix:
-            cols = st.columns(6)  # Create six columns per row
-            for i, col in enumerate(cols):
-                if i < len(row):  # Ensure we don't access out-of-bounds elements
-                    col.write(format_entry_display(row[i]))
+        # Group entries into columns of six numbers each
+        num_columns = len(entries) // 6 + (1 if len(entries) % 6 != 0 else 0)  # Total number of columns needed
+        cols = st.columns(num_columns)  # Create columns dynamically
+
+        # Populate columns
+        for i, entry in enumerate(entries):
+            col_index = i // 6
+            cols[col_index].write(format_entry_display(entry))
+
+        # Add total entries display
+        st.markdown(f"<h5>Total Entries: {len(entries)}</h5>", unsafe_allow_html=True)
 
 # Streamlit UI
 st.title("Weighted Prediction Program")
