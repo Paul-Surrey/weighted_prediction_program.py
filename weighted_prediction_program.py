@@ -68,18 +68,28 @@ def display_predictions(entries, main_numbers, matches):
                 weighted_matches[entry] += 1
 
         probabilities = {num: round((weighted_matches[num] / total_weight) * 100, 2) for num in main_numbers}
+        probabilities_sorted = sorted(probabilities.items(), key=lambda x: x[1], reverse=True)
+
+        # Calculate "Posible" probability
+        no_hit_probability = 1.0
+        for _, prob in probabilities.items():
+            no_hit_probability *= (1 - prob / 100)
+        posible_probability = round((1 - no_hit_probability) * 100, 2)
 
         # Display results with smaller font
         st.markdown("<h4>Prediction Results:</h4>", unsafe_allow_html=True)
-        results = " | ".join(f"{format_entry_display(num)}: {prob}%" for num, prob in probabilities.items())
+        results = " | ".join(f"{format_entry_display(num)}: {prob}%" for num, prob in probabilities_sorted)
         st.write(results)
+        st.write(f"**Posible:** {posible_probability}% chance of at least one hit.")
 
 def display_matrix(entries):
     if entries:
-        # Display matrix with smaller font for title
         st.markdown("<h4>Matrix of Entries:</h4>", unsafe_allow_html=True)
         matrix = [[format_entry_display(entry) for entry in entries[i:i + 6]] for i in range(0, len(entries), 6)]
-        st.dataframe(matrix, use_container_width=True)
+        for row in matrix:
+            columns = st.columns(len(row))  # Create equal-width columns for the row
+            for i, col in enumerate(columns):
+                col.write(row[i])
 
 # Streamlit UI
 st.title("Weighted Prediction Program")
