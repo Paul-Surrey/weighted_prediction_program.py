@@ -91,8 +91,6 @@ if "entries" not in st.session_state:
     st.session_state["entries"] = []
 if "matches" not in st.session_state:
     st.session_state["matches"] = np.zeros(38)
-if "new_number_input" not in st.session_state:
-    st.session_state["new_number_input"] = ""  # Initialize as empty string for clear input
 
 # User input for main numbers
 main_numbers_input = st.text_input("Enter 6 Main Numbers (comma-separated):")
@@ -103,20 +101,13 @@ if st.button("Set Main Numbers"):
     else:
         set_main_numbers(validation_result)
 
-# Automatically handle new entry with Go button and clear input
-new_entry = st.text_input("Enter a New Number (0-36, 37 for '00'):", key="new_number_input")
-if new_entry.strip():  # Ensure the input is not empty or just whitespace
-    try:
-        number = int(new_entry)
-        if 0 <= number <= 37:
-            add_entry(number)
-            display_predictions(st.session_state["entries"], st.session_state["main_numbers"], st.session_state["matches"])
-            display_matrix(st.session_state["entries"])
-            st.session_state["new_number_input"] = ""  # Clear input field for new entry
-        else:
-            st.error("Please enter a number between 0 and 37.")
-    except ValueError:
-        st.error("Invalid input. Please enter a valid number.")
+# Automatically handle new entry using a number input
+new_entry = st.number_input("Enter a New Number (0-36, 37 for '00'):", min_value=0, max_value=37, step=1, key="new_number_input")
+if new_entry != st.session_state.get("last_entry", None):  # Check for new input
+    st.session_state["last_entry"] = new_entry  # Track the last processed input
+    add_entry(int(new_entry))
+    display_predictions(st.session_state["entries"], st.session_state["main_numbers"], st.session_state["matches"])
+    display_matrix(st.session_state["entries"])
 
 # Buttons for actions (reordered)
 if st.button("Backtrack Last Entry"):
