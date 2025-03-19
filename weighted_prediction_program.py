@@ -85,14 +85,25 @@ def display_predictions(entries, main_numbers, matches):
 def display_matrix(entries):
     if entries:
         st.markdown("<h4>Matrix of Entries:</h4>", unsafe_allow_html=True)
-        # Group entries into columns of six numbers each
-        num_columns = len(entries) // 6 + (1 if len(entries) % 6 != 0 else 0)  # Total number of columns needed
-        cols = st.columns(num_columns)  # Create columns dynamically
+        # Group entries into columns of six numbers each using a table layout
+        num_columns = len(entries) // 6 + (1 if len(entries) % 6 != 0 else 0)
+        rows = []
+        for i in range(6):  # A maximum of 6 rows
+            row = []
+            for j in range(num_columns):
+                index = j * 6 + i
+                if index < len(entries):
+                    row.append(format_entry_display(entries[index]))
+                else:
+                    row.append("")  # Fill empty spaces
+            rows.append(row)
 
-        # Populate columns
-        for i, entry in enumerate(entries):
-            col_index = i // 6
-            cols[col_index].write(format_entry_display(entry))
+        # Render as a simple HTML table for mobile compatibility
+        table_html = "<table style='width:100%; text-align:center;'>"
+        for row in rows:
+            table_html += "<tr>" + "".join(f"<td>{cell}</td>" for cell in row) + "</tr>"
+        table_html += "</table>"
+        st.markdown(table_html, unsafe_allow_html=True)
 
         # Add total entries display
         st.markdown(f"<h5>Total Entries: {len(entries)}</h5>", unsafe_allow_html=True)
@@ -107,6 +118,8 @@ if "entries" not in st.session_state:
     st.session_state["entries"] = []
 if "matches" not in st.session_state:
     st.session_state["matches"] = np.zeros(38)
+if "new_number_input" not in st.session_state:
+    st.session_state["new_number_input"] = ""  # Initialize as empty string
 
 # User input for main numbers
 main_numbers_input = st.text_input("Enter 6 Main Numbers (comma-separated):")
@@ -118,8 +131,8 @@ if st.button("Set Main Numbers"):
         set_main_numbers(validation_result)
 
 # Automatically handle new entry using a number input
-new_entry = st.number_input("Enter a New Number (0-36, 37 for '00'):", min_value=0, max_value=37, step=1, key="new_number_input")
-if new_entry != st.session_state.get("last_entry", None):  # Check for new input
+new_entry = st.number_input("Enter a New Number (0-36, 37 for '00'):", min_value=None, max_value=None, step=1)
+if new_entry != st.session_state.get("last_entry", None) and new_entry != 0:  # Check for valid new input
     st.session_state["last_entry"] = new_entry  # Track the last processed input
     add_entry(int(new_entry))
     display_predictions(st.session_state["entries"], st.session_state["main_numbers"], st.session_state["matches"])
